@@ -9,7 +9,9 @@ import uk.ac.bournemouth.ap.dotsandboxeslib.test.TestDotsAndBoxes
  * add your own tests if you wish so (make a no-arg function and give it a `@Test` annotation).
  */
 internal class StudentDotsBoxGameTest : TestDotsAndBoxes() {
-    override fun createGame(columns: Int, rows: Int, players: List<Player>): DotsAndBoxesGame {
-        return TODO("Create a game of your game type with the correct columns, rows and players")
+    override fun createGame(columns: Int, rows: Int, players: List<Player> ): DotsAndBoxesGame {
+        val game = StudentDotsBoxGame(columns,rows, players)
+        return game
+        //return TODO("Create a game of your game type with the correct columns, rows and players")
     }
 }
