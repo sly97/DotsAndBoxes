@@ -12,6 +12,5 @@ internal class StudentDotsBoxGameTest : TestDotsAndBoxes() {
     override fun createGame(columns: Int, rows: Int, players: List<Player> ): DotsAndBoxesGame {
         val game = StudentDotsBoxGame(columns,rows, players)
         return game
-        //return TODO("Create a game of your game type with the correct columns, rows and players")
     }
 }

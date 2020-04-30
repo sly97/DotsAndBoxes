@@ -8,18 +8,15 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
     override val players: List<Player> = players.toList()
 
     override var currentPlayer: Player = players[0]
-    // get()= TODO("Determine the current player, like keeping" + "the index into the players list")
 
     // NOTE: you may want to me more specific in the box type if you use that type in your class
     override var boxes: Matrix<StudentBox> = MutableMatrix(columns,rows, ::StudentBox)
-    //TODO("Create a matrix initialized with your own box type")
 
     override var lines: SparseMatrix<StudentLine> = MutableSparseMatrix(columns + 1,rows * 2 + 1, ::StudentLine){
             x, y -> y % 2 == 1 || x < columns
-        } // TODO("Create a matrix initialized with your own line type")
+        }
 
     override var isFinished: Boolean = false
-        //get() = TODO("Provide this getter. Note you can make it a var to do so")
 
     override fun playComputerTurns() {
         var current = currentPlayer
@@ -36,7 +33,6 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
      */
     inner class StudentLine(lineX: Int, lineY: Int) : AbstractLine(lineX, lineY) {
         override var isDrawn: Boolean = false
-        //TODO("Provide this getter. Note you can make it a var to do so")
 
 
         override val adjacentBoxes: Pair<StudentBox?, StudentBox?>
@@ -72,27 +68,23 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
                     val boxB = boxes[lineX, lineY - (lineY / 2)]
                     return Pair(boxA,boxB)
                 }
-                //TODO("You need to look up the correct boxes for this to work")
             }
 
         override fun drawLine(){
             var extraMove = false
             if(!this.isDrawn){
-                println(""+lineX+","+lineY)
                 this.isDrawn = true
                 for (b in adjacentBoxes.toList()){
                     if (b != null) {
                         val boxOwned = b.boundingLines.all { it.isDrawn }
                         if(boxOwned){
-                            //boxes[b.boxX,b.boxY].owningPlayer = null
-                            //this.adjacentBoxes.first.owningPlayer = currentPlayer
                             b.owningPlayer = currentPlayer
                             extraMove = true
                         }
                     }
                 }
-                fireGameChange()
 
+                fireGameChange()
 
                 if(!extraMove) {
                     if (players.indexOf(currentPlayer) == players.size - 1) {
@@ -112,24 +104,18 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
                     }
                     if(ownedBoxes == boxes.count()){
                         isFinished = true
-                        println(allScores.toString())
-                        println(getScores().toList().toString())
                         fireGameOver(allScores)
                     }
                 }
             }else{
                 throw Exception("Line is already drawn")
             }
-
-            //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
-            // NOTE read the documentation in the interface, you must also update the current player.
         }
     }
 
     inner class StudentBox(boxX: Int, boxY: Int) : AbstractBox(boxX, boxY) {
 
         override var owningPlayer: Player? = null
-        // TODO("Provide this getter. Note you can make it a var to do so")
 
         /**
          * This must be lazy or a getter, otherwise there is a chicken/egg problem with the boxes
@@ -144,7 +130,6 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
                 return boxLines
             }
 
-                //TODO("Look up the correct lines from the game outer class")
 
     }
 }
