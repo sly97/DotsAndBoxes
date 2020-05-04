@@ -34,7 +34,7 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
     inner class StudentLine(lineX: Int, lineY: Int) : AbstractLine(lineX, lineY) {
         override var isDrawn: Boolean = false
 
-
+        //Holds coordinates of adjacent boxes to a line
         override val adjacentBoxes: Pair<StudentBox?, StudentBox?>
             get() {
                 if(lineX == 0 && lineY % 2 == 1){
@@ -71,6 +71,7 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
             }
 
         override fun drawLine(){
+            //Checks if player gets another move
             var extraMove = false
             if(!this.isDrawn){
                 this.isDrawn = true
@@ -86,6 +87,7 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
 
                 fireGameChange()
 
+                //checks extraMove and moves to next player, or adds score per box, and checks if last box is completed
                 if(!extraMove) {
                     if (players.indexOf(currentPlayer) == players.size - 1) {
                         currentPlayer = players[0]

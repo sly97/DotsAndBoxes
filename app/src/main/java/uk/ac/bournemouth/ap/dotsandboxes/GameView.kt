@@ -1,9 +1,8 @@
 package uk.ac.bournemouth.ap.dotsandboxes
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
@@ -11,16 +10,13 @@ import org.example.student.dotsboxgame.StudentDotsBoxGame
 import uk.ac.bournemouth.ap.dotsandboxeslib.HumanPlayer
 import java.lang.Exception
 
-class GameView : View {
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+@SuppressLint("ViewConstructor")
+class GameView(context: Context?, playAs: String, gridSize : List<String>) : View(context) {
 
-    private val colCount = 5
-    private val rowCount = 5
 
-    private val player1 = HumanPlayer()
-    private val myGame = StudentDotsBoxGame(colCount, rowCount, listOf(player1))
+    private var colCount = 5
+    private var rowCount = 5
+    private var playAsOption : String = ""
 
     private var drawingLine : Boolean = false
     private var startX : Float = 0f
@@ -61,14 +57,30 @@ class GameView : View {
         isFakeBoldText = true
     }
 
+    private var player1 : HumanPlayer = HumanPlayer()
+    private var player2 : HumanPlayer = HumanPlayer()
+    private var players : List<HumanPlayer> = listOf()
+    private var myGame : StudentDotsBoxGame = StudentDotsBoxGame(4,4,listOf(player1))
+
+    init {
+        playAsOption = playAs
+        if(playAsOption == "Friend"){
+            players = listOf(player1,player2)
+        }else{
+            players = listOf(player1,player2)
+        }
+        colCount = gridSize[0].toInt()+1
+        rowCount = gridSize[1].toInt()+1
+        myGame = StudentDotsBoxGame(colCount-1, rowCount-1, players)
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
         val chosenDiameter: Float
         val marginTop = 250f
 
         var drawingFromDot = false
-        val drawFromDotRadius = 40f
+        val drawFromDotRadius = 50f
 
         val viewWidth: Float = width.toFloat()
         val viewHeight: Float = height.toFloat()
@@ -150,8 +162,6 @@ class GameView : View {
                             Toast.makeText(this.context,e.message,Toast.LENGTH_SHORT).show()
                         }
 
-                    }else if(!drawingLine){
-                        Log.d("MyGame","Not Valid")
                     }
                 }
                 if (row != rowCount-1 || col != colCount-1) {
@@ -172,8 +182,27 @@ class GameView : View {
             }
         }
 
-        canvas.drawText("Human",(viewWidth / 2),120.toFloat(),mBoxHumanPlayerPaint)
-        canvas.drawText("Computer",(viewWidth / 2),marginTop,mBoxComputerPlayerPaint)
+        val allScores  = ArrayList<Int>(players.size)
+        players.forEach { allScores.add(0) }
+        var ownedBoxes = 0
+        for (b in myGame.boxes){
+            if(b.owningPlayer != null){
+                allScores[players.indexOf(b.owningPlayer)] += 1
+                ownedBoxes++
+            }
+        }
+
+        val player1Current = if(players.indexOf(myGame.currentPlayer) == 0) "> " else ""
+        val player2Current = if(players.indexOf(myGame.currentPlayer) == 1) "> " else ""
+        val player1Name = "You"
+        var player2Name = ""
+        if(playAsOption == "Friend"){
+            player2Name = "Friend"
+        }else{
+            player2Name = "Computer"
+        }
+        canvas.drawText(player1Current+player1Name+": "+allScores[0],(viewWidth / 2),120.toFloat(),mBoxHumanPlayerPaint)
+        canvas.drawText(player2Current+player2Name+": "+allScores[1],(viewWidth / 2),marginTop,mBoxComputerPlayerPaint)
 
         if(drawingFromDot && drawingLine) canvas.drawLine(startX, startY, endX, endY, mGridLineDrawnPaint)
 
@@ -184,7 +213,8 @@ class GameView : View {
             val boxEndX : Float = boxStartX + chosenDiameter
             val boxEndY : Float = boxStartY + chosenDiameter
             if (boxComplete){
-                canvas.drawRect(boxStartX,boxStartY,boxEndX,boxEndY,mBoxHumanPlayerPaint)
+                if(players.indexOf(box.owningPlayer) == 0) canvas.drawRect(boxStartX,boxStartY,boxEndX,boxEndY,mBoxHumanPlayerPaint)
+                else canvas.drawRect(boxStartX,boxStartY,boxEndX,boxEndY,mBoxComputerPlayerPaint)
             }
         }
 
@@ -235,14 +265,6 @@ class GameView : View {
             MotionEvent.ACTION_UP -> {
                 drawingLine = false
                 invalidate()
-                return true
-            }
-            MotionEvent.ACTION_CANCEL -> {
-                Log.d(DEBUG_TAG, "Action was CANCEL")
-                return true
-            }
-            MotionEvent.ACTION_OUTSIDE -> {
-                Log.d(DEBUG_TAG, "Outside bounds of current screen element")
                 return true
             }
             else -> return super.onTouchEvent(event)
