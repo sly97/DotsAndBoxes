@@ -1,17 +1,14 @@
 package uk.ac.bournemouth.ap.dotsandboxes
 
-import android.R
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.*
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import org.example.student.dotsboxgame.StudentDotsBoxGame
-import uk.ac.bournemouth.ap.dotsandboxeslib.ComputerPlayer
 import uk.ac.bournemouth.ap.dotsandboxeslib.DotsAndBoxesGame
 import uk.ac.bournemouth.ap.dotsandboxeslib.HumanPlayer
 import uk.ac.bournemouth.ap.dotsandboxeslib.Player
@@ -43,13 +40,18 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
     }
     private var mGridLinePaint : Paint = Paint().apply {
         style = Paint.Style.FILL
-        color = Color.LTGRAY
+        color = Color.rgb(215,215,215)
         strokeWidth = 7.5.toFloat()
     }
     private var mGridLineDrawnPaint : Paint = Paint().apply {
         style = Paint.Style.FILL
         color = Color.DKGRAY
         strokeWidth = 7.5.toFloat()
+    }
+    private var mGridLineDrawnLastPaint : Paint = Paint().apply {
+        style = Paint.Style.FILL
+        color = Color.DKGRAY
+        strokeWidth = 11.toFloat()
     }
     private var mBoxHumanPlayerPaint : Paint = Paint().apply {
         style = Paint.Style.FILL
@@ -83,6 +85,13 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
         rowCount = gridSize[1].toInt()+1
         myGame = StudentDotsBoxGame(colCount-1, rowCount-1, players)
 
+        //Draw lines when added
+        var listenerOnGameChange = object : DotsAndBoxesGame.GameChangeListener {
+            override fun onGameChange(game: DotsAndBoxesGame) {
+                invalidate()
+            }
+        }
+
         //Dialog of GameOver.
         var listenerOnGameOver = object : DotsAndBoxesGame.GameOverListener {
             override fun onGameOver(game: DotsAndBoxesGame, scores: List<Pair<Player, Int>>) {
@@ -100,6 +109,7 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
             }
         }
 
+        myGame.addOnGameChangeListener(listenerOnGameChange)
         myGame.addOnGameOverListener(listenerOnGameOver)
     }
 
@@ -186,6 +196,11 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                         }
                         try {
                             myGame.lines[lineX,lineY].drawLine()
+                            startX = 0f
+                            startY = 0f
+                            endX = 0f
+                            endY = 0f
+                            Thread.sleep(400L)
                         }catch (e : Exception){
                             if(e.message?.contains("out of range") == false){
                                 Toast.makeText(this.context,e.message,Toast.LENGTH_SHORT).show()
@@ -275,7 +290,8 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                     lineEndX = lineStartX
                     lineEndY = lineStartY+chosenDiameter
                 }
-                canvas.drawLine(lineStartX, lineStartY, lineEndX, lineEndY, mGridLineDrawnPaint)
+                if(myGame.lastDrawnLine == line) canvas.drawLine(lineStartX, lineStartY, lineEndX, lineEndY, mGridLineDrawnLastPaint)
+                else canvas.drawLine(lineStartX, lineStartY, lineEndX, lineEndY, mGridLineDrawnPaint)
             }
         }
 

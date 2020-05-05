@@ -26,6 +26,8 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
         }
     }
 
+    var lastDrawnLine : StudentLine? = null
+
     /**
      * This is an inner class as it needs to refer to the game to be able to look up the correct
      * lines and boxes. Alternatively you can have a game property that does the same thing without
@@ -75,6 +77,7 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
             var extraMove = false
             if(!this.isDrawn){
                 this.isDrawn = true
+                lastDrawnLine = this
                 for (b in adjacentBoxes.toList()){
                     if (b != null) {
                         val boxOwned = b.boundingLines.all { it.isDrawn }

@@ -14,9 +14,9 @@ class Game : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
-        playAs = intent.getStringExtra("playAs")
-        gridSizeRow = intent.getStringExtra("gridSizeRow")
-        gridSizeCol = intent.getStringExtra("gridSizeCol")
+        playAs = intent?.getStringExtra("playAs").toString()
+        gridSizeRow = intent?.getStringExtra("gridSizeRow").toString()
+        gridSizeCol = intent?.getStringExtra("gridSizeCol").toString()
 
         mGameView = GameView(this, playAs, listOf(gridSizeRow,gridSizeCol))
         setContentView(mGameView)
