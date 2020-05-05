@@ -1,29 +1,38 @@
 package uk.ac.bournemouth.ap.dotsandboxes
 
+import android.R
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.*
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import org.example.student.dotsboxgame.StudentDotsBoxGame
+import uk.ac.bournemouth.ap.dotsandboxeslib.ComputerPlayer
+import uk.ac.bournemouth.ap.dotsandboxeslib.DotsAndBoxesGame
 import uk.ac.bournemouth.ap.dotsandboxeslib.HumanPlayer
+import uk.ac.bournemouth.ap.dotsandboxeslib.Player
 import java.lang.Exception
+import kotlin.random.Random
 
 @SuppressLint("ViewConstructor")
 class GameView(context: Context?, playAs: String, gridSize : List<String>) : View(context) {
-
 
     private var colCount = 5
     private var rowCount = 5
     private var playAsOption : String = ""
 
+    //Starts gesture detection and tracks coordinates
     private var drawingLine : Boolean = false
     private var startX : Float = 0f
     private var startY : Float = 0f
     private var endX : Float = 0f
     private var endY : Float = 0f
 
+    //Paints for UI
     private var mGridPaint : Paint = Paint().apply {
         style = Paint.Style.FILL
         color = Color.WHITE
@@ -57,9 +66,10 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
         isFakeBoldText = true
     }
 
+    //declares default player value
     private var player1 : HumanPlayer = HumanPlayer()
     private var player2 : HumanPlayer = HumanPlayer()
-    private var players : List<HumanPlayer> = listOf()
+    private var players : List<Player> = listOf()
     private var myGame : StudentDotsBoxGame = StudentDotsBoxGame(4,4,listOf(player1))
 
     init {
@@ -67,11 +77,32 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
         if(playAsOption == "Friend"){
             players = listOf(player1,player2)
         }else{
-            players = listOf(player1,player2)
+            players = listOf(player1, RandomComputerPlayer())
         }
         colCount = gridSize[0].toInt()+1
         rowCount = gridSize[1].toInt()+1
         myGame = StudentDotsBoxGame(colCount-1, rowCount-1, players)
+
+        //Dialog of GameOver.
+        var listenerOnGameOver = object : DotsAndBoxesGame.GameOverListener {
+            override fun onGameOver(game: DotsAndBoxesGame, scores: List<Pair<Player, Int>>) {
+                val builder : AlertDialog.Builder = (context as Game).let { AlertDialog.Builder(it) }
+                builder.apply { setPositiveButton("Close",DialogInterface.OnClickListener { dialog, id ->
+                    context.finishMe()
+                }) }
+                builder.apply { setNegativeButton("Restart",DialogInterface.OnClickListener { dialog, id ->
+                    context.restartGame()
+                    invalidate()
+                }) }
+                builder.setMessage("Please choose an option")?.setTitle("Game Over!")
+                val dialog = builder.create()
+                dialog.show()
+
+                Log.d("MyGame","over!")
+            }
+        }
+
+        myGame.addOnGameOverListener(listenerOnGameOver)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -100,29 +131,29 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
             for (row in 0 until rowCount) {
                 // Calculate the co-ordinates of the circle
                 val cx = chosenDiameter * col + radius
-                val cy = chosenDiameter * row + radius
+                val cy = marginTop+chosenDiameter * row + radius
 
-                if(startX in cx-drawFromDotRadius..cx+drawFromDotRadius && startY in marginTop+cy-drawFromDotRadius..marginTop+cy+drawFromDotRadius){
+                if(startX in cx-drawFromDotRadius..cx+drawFromDotRadius && startY in cy-drawFromDotRadius..cy+drawFromDotRadius){
                     startX = cx
-                    startY = marginTop+cy
+                    startY = cy
                     drawingFromDot = true
 
-                    if(endX in cx-chosenDiameter-drawFromDotRadius..cx-chosenDiameter+drawFromDotRadius && endY in marginTop+cy-drawFromDotRadius..marginTop+cy+drawFromDotRadius){
+                    if(endX in cx-chosenDiameter-drawFromDotRadius..cx-chosenDiameter+drawFromDotRadius && endY in cy-drawFromDotRadius..cy+drawFromDotRadius){
                         //Drawing Left
                         endX = cx-chosenDiameter
-                        endY = marginTop+cy
-                    }else if(endX in cx+chosenDiameter-drawFromDotRadius..cx+chosenDiameter+drawFromDotRadius && endY in marginTop+cy-drawFromDotRadius..marginTop+cy+drawFromDotRadius){
+                        endY = cy
+                    }else if(endX in cx+chosenDiameter-drawFromDotRadius..cx+chosenDiameter+drawFromDotRadius && endY in cy-drawFromDotRadius..cy+drawFromDotRadius){
                         //Drawing Right
                         endX = cx+chosenDiameter
-                        endY = marginTop+cy
-                    }else if(endX in cx-drawFromDotRadius..cx+drawFromDotRadius && endY in marginTop+cy-chosenDiameter-drawFromDotRadius..marginTop+cy-chosenDiameter+drawFromDotRadius){
+                        endY = cy
+                    }else if(endX in cx-drawFromDotRadius..cx+drawFromDotRadius && endY in cy-chosenDiameter-drawFromDotRadius..cy-chosenDiameter+drawFromDotRadius){
                         //Drawing Down
                         endX = cx
-                        endY = marginTop+cy-chosenDiameter
-                    }else if(endX in cx-drawFromDotRadius..cx+drawFromDotRadius && endY in marginTop+cy+chosenDiameter-drawFromDotRadius..marginTop+cy+chosenDiameter+drawFromDotRadius){
+                        endY = cy-chosenDiameter
+                    }else if(endX in cx-drawFromDotRadius..cx+drawFromDotRadius && endY in cy+chosenDiameter-drawFromDotRadius..cy+chosenDiameter+drawFromDotRadius){
                         //Drawing Up
                         endX = cx
-                        endY = marginTop+cy+chosenDiameter
+                        endY = cy+chosenDiameter
                     }else if(!drawingLine){
                         startX = 0f
                         startY = 0f
@@ -130,8 +161,7 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                         endY = 0f
                     }
 
-
-
+                    //detecs a line, its coordinates and draws finally a line
                     if(!drawingLine && startX != 0f && startY != 0f && endX != 0f && endY != 0f){
                         val lineX : Int
                         val lineY : Int
@@ -159,39 +189,46 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                         try {
                             myGame.lines[lineX,lineY].drawLine()
                         }catch (e : Exception){
-                            Toast.makeText(this.context,e.message,Toast.LENGTH_SHORT).show()
+                            if(e.message?.contains("out of range") == false){
+                                Toast.makeText(this.context,e.message,Toast.LENGTH_SHORT).show()
+                            }
                         }
 
                     }
                 }
+
+                //Draw the grid lines and dots
                 if (row != rowCount-1 || col != colCount-1) {
                     when {
                         row == rowCount-1 -> {
-                            canvas.drawLine(cx,marginTop+cy,cx+chosenDiameter,marginTop+cy,mGridLinePaint)
+                            canvas.drawLine(cx,cy,cx+chosenDiameter,cy,mGridLinePaint)
                         }
                         col == colCount-1 -> {
-                            canvas.drawLine(cx,marginTop+cy,cx,marginTop+cy+chosenDiameter,mGridLinePaint)
+                            canvas.drawLine(cx,cy,cx,cy+chosenDiameter,mGridLinePaint)
                         }
                         else              -> {
-                            canvas.drawLine(cx,marginTop+cy,cx+chosenDiameter,marginTop+cy,mGridLinePaint)
-                            canvas.drawLine(cx,marginTop+cy,cx,marginTop+cy+chosenDiameter,mGridLinePaint)
+                            canvas.drawLine(cx,cy,cx+chosenDiameter,cy,mGridLinePaint)
+                            canvas.drawLine(cx,cy,cx,cy+chosenDiameter,mGridLinePaint)
                         }
                     }
                 }
-                canvas.drawCircle(cx, marginTop+cy, 10.toFloat(), mGridDotPaint)
+                canvas.drawCircle(cx, cy, 10.toFloat(), mGridDotPaint)
             }
         }
 
+        //Takes scores per player
         val allScores  = ArrayList<Int>(players.size)
         players.forEach { allScores.add(0) }
         var ownedBoxes = 0
         for (b in myGame.boxes){
-            if(b.owningPlayer != null){
-                allScores[players.indexOf(b.owningPlayer)] += 1
+            val owner = b.owningPlayer
+            if(owner != null){
+                allScores[players.indexOf(owner)] += 1
                 ownedBoxes++
             }
         }
 
+        //Identidies the curent player
         val player1Current = if(players.indexOf(myGame.currentPlayer) == 0) "> " else ""
         val player2Current = if(players.indexOf(myGame.currentPlayer) == 1) "> " else ""
         val player1Name = "You"
@@ -204,8 +241,10 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
         canvas.drawText(player1Current+player1Name+": "+allScores[0],(viewWidth / 2),120.toFloat(),mBoxHumanPlayerPaint)
         canvas.drawText(player2Current+player2Name+": "+allScores[1],(viewWidth / 2),marginTop,mBoxComputerPlayerPaint)
 
+        //Draw the gesture detected if any and if valid
         if(drawingFromDot && drawingLine) canvas.drawLine(startX, startY, endX, endY, mGridLineDrawnPaint)
 
+        //Draw occupied boxes
         for (box in myGame.boxes){
             val boxComplete = box.boundingLines.all { it.isDrawn }
             val boxStartX : Float = box.boxX * chosenDiameter + radius
@@ -218,6 +257,7 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
             }
         }
 
+        //Draw drawn lines visually on the grid
         for (line in myGame.lines){
             if(line.isDrawn){
                 var lineStartX : Float
@@ -240,8 +280,11 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                 canvas.drawLine(lineStartX, lineStartY, lineEndX, lineEndY, mGridLineDrawnPaint)
             }
         }
+
+
     }
 
+    //Detects gesture
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val DEBUG_TAG = "MyTask"
         val action: Int = event.actionMasked
@@ -253,7 +296,7 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                 // Set the end to prevent initial jump (like on the demo recording)
                 endX = event.getX()
                 endY = event.getY()
-                invalidate()
+                invalidate() //Call onDraw
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -270,6 +313,8 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
             else -> return super.onTouchEvent(event)
         }
     }
+
+
 
 
 }
