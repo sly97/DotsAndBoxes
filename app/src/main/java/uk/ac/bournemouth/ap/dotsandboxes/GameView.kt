@@ -97,8 +97,6 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                 builder.setMessage("Please choose an option")?.setTitle("Game Over!")
                 val dialog = builder.create()
                 dialog.show()
-
-                Log.d("MyGame","over!")
             }
         }
 
