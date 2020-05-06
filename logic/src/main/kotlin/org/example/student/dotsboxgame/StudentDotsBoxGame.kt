@@ -92,10 +92,10 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
 
                 //checks extraMove and moves to next player, or adds score per box, and checks if last box is completed
                 if(!extraMove) {
-                    if (players.indexOf(currentPlayer) == players.size - 1) {
-                        currentPlayer = players[0]
+                    currentPlayer = if (players.indexOf(currentPlayer) == players.size - 1) {
+                        players[0]
                     } else {
-                        currentPlayer = players[players.indexOf(currentPlayer) + 1]
+                        players[players.indexOf(currentPlayer) + 1]
                     }
                     playComputerTurns()
                 }else{
@@ -134,7 +134,5 @@ class StudentDotsBoxGame(val columns : Int, val rows : Int, players : List<Playe
                 boxLines.add(lines[boxX+1, boxY*2+1]) // Right Line
                 return boxLines
             }
-
-
     }
 }

@@ -14,6 +14,7 @@ class Game : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
+        //Gets necessary values to start the game from the user's choice
         playAs = intent?.getStringExtra("playAs").toString()
         gridSizeRow = intent?.getStringExtra("gridSizeRow").toString()
         gridSizeCol = intent?.getStringExtra("gridSizeCol").toString()

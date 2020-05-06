@@ -11,7 +11,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:text="Start Game"
+            android:text="@string/start_game_btn"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:text="Welcome to the Dots &amp; Box Game"
+            android:text="@string/welcome_msg"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:text="Choose An Opponent:"
+            android:text="@string/choose_an_opponent"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/playAsOptions"
@@ -57,7 +57,7 @@
                 android:layout_marginRight="40sp"
                 android:checked="true"
                 android:gravity="center"
-                android:text="Play Against A Friend"
+                android:text="@string/choose_an_opponent_friend"
                 android:textSize="24sp" />
 
         <RadioButton
@@ -67,7 +67,7 @@
                 android:layout_marginLeft="40sp"
                 android:layout_marginRight="40sp"
                 android:gravity="center"
-                android:text="Play Against The Computer"
+                android:text="@string/choose_an_opponent_computer"
                 android:textSize="24sp" />
     </RadioGroup>
 
@@ -76,7 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:text="Choose A Grid Size:"
+            android:text="@string/choose_a_grid_size"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/gridSize"
@@ -99,7 +99,7 @@
                 android:layout_marginLeft="40sp"
                 android:layout_marginRight="40sp"
                 android:gravity="center"
-                android:text="3x3"
+                android:text="@string/choose_a_grid_size_3"
                 android:textSize="24sp" />
 
         <RadioButton
@@ -110,7 +110,7 @@
                 android:layout_marginRight="40sp"
                 android:checked="true"
                 android:gravity="center"
-                android:text="4x4"
+                android:text="@string/choose_a_grid_size_4"
                 android:textSize="24sp" />
         <RadioButton
                 android:id="@+id/gridSize5"
@@ -119,7 +119,7 @@
                 android:layout_marginLeft="40sp"
                 android:layout_marginRight="40sp"
                 android:gravity="center"
-                android:text="5x5"
+                android:text="@string/choose_a_grid_size_5"
                 android:textSize="24sp" />
         <RadioButton
                 android:id="@+id/gridSize6"
@@ -128,7 +128,7 @@
                 android:layout_marginLeft="40sp"
                 android:layout_marginRight="40sp"
                 android:gravity="center"
-                android:text="6x6"
+                android:text="@string/choose_a_grid_size_6"
                 android:textSize="24sp" />
 
     </RadioGroup>

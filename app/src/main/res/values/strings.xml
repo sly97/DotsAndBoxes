@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">Dots and boxes</string>
+    <string name="start_game_btn">Start Game</string>
+    <string name="welcome_msg"><![CDATA[Welcome to the Dots & Box Game]]></string>
+    <string name="choose_an_opponent">Choose An Opponent:</string>
+    <string name="choose_an_opponent_friend">Play Against A Friend</string>
+    <string name="choose_an_opponent_computer">Play Against The Computer</string>
+    <string name="choose_a_grid_size">Choose A Grid Size:</string>
+    <string name="choose_a_grid_size_3">3x3</string>
+    <string name="choose_a_grid_size_4">4x4</string>
+    <string name="choose_a_grid_size_5">5x5</string>
+    <string name="choose_a_grid_size_6">6x6</string>
+
+    <string name="player1_name">You</string>
+    <string name="friend_name">Friend</string>
+    <string name="computer_name">Computer</string>
+
+    <string name="close_game">Close</string>
+    <string name="restart_game">Restart</string>
+    <string name="game_over_title">Game Over!</string>
+    <string name="game_over_message">Please choose an option</string>
+
+    <string name="error_line_already_drawn">Line is already drawn</string>
 </resources>

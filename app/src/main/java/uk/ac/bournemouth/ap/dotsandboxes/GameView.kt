@@ -3,7 +3,6 @@ package uk.ac.bournemouth.ap.dotsandboxes
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.*
 import android.view.MotionEvent
 import android.view.View
@@ -13,7 +12,6 @@ import uk.ac.bournemouth.ap.dotsandboxeslib.DotsAndBoxesGame
 import uk.ac.bournemouth.ap.dotsandboxeslib.HumanPlayer
 import uk.ac.bournemouth.ap.dotsandboxeslib.Player
 import java.lang.Exception
-import kotlin.random.Random
 
 @SuppressLint("ViewConstructor")
 class GameView(context: Context?, playAs: String, gridSize : List<String>) : View(context) {
@@ -76,34 +74,36 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
 
     init {
         playAsOption = playAs
-        if(playAsOption == "Friend"){
-            players = listOf(player1,player2)
+        players = if(playAsOption == "Friend"){
+            listOf(player1,player2)
         }else{
-            players = listOf(player1, RandomComputerPlayer())
+            listOf(player1, RandomComputerPlayer())
         }
         colCount = gridSize[0].toInt()+1
         rowCount = gridSize[1].toInt()+1
         myGame = StudentDotsBoxGame(colCount-1, rowCount-1, players)
 
         //Draw lines when added
-        var listenerOnGameChange = object : DotsAndBoxesGame.GameChangeListener {
+        val listenerOnGameChange = object : DotsAndBoxesGame.GameChangeListener {
             override fun onGameChange(game: DotsAndBoxesGame) {
                 invalidate()
             }
         }
 
         //Dialog of GameOver.
-        var listenerOnGameOver = object : DotsAndBoxesGame.GameOverListener {
+        val listenerOnGameOver = object : DotsAndBoxesGame.GameOverListener {
             override fun onGameOver(game: DotsAndBoxesGame, scores: List<Pair<Player, Int>>) {
                 val builder : AlertDialog.Builder = (context as Game).let { AlertDialog.Builder(it) }
-                builder.apply { setPositiveButton("Close",DialogInterface.OnClickListener { dialog, id ->
+                builder.apply { setPositiveButton(context.getString(R.string.close_game)) { _, _ ->
                     context.finishMe()
-                }) }
-                builder.apply { setNegativeButton("Restart",DialogInterface.OnClickListener { dialog, id ->
+                }
+                }
+                builder.apply { setNegativeButton(context.getString(R.string.restart_game)) { _, _ ->
                     context.restartGame()
                     invalidate()
-                }) }
-                builder.setMessage("Please choose an option")?.setTitle("Game Over!")
+                }
+                }
+                builder.setMessage(context.getString(R.string.game_over_message)).setTitle(context.getString(R.string.game_over_title))
                 val dialog = builder.create()
                 dialog.show()
             }
@@ -113,6 +113,7 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
         myGame.addOnGameOverListener(listenerOnGameOver)
     }
 
+    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val chosenDiameter: Float
@@ -128,8 +129,8 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
         val diameterY: Float = viewHeight / rowCount.toFloat()
 
         // Choose the smallest of the two
-        if (diameterX < diameterY) chosenDiameter = diameterX
-        else chosenDiameter = diameterY
+        chosenDiameter = if (diameterX < diameterY) diameterX
+        else diameterY
 
         canvas.drawRect(0.toFloat(), 0.toFloat(), viewWidth, viewHeight, mGridPaint)
 
@@ -169,7 +170,7 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                         endY = 0f
                     }
 
-                    //detecs a line, its coordinates and draws finally a line
+                    //detects a line, its coordinates and draws finally a line
                     if(!drawingLine && startX != 0f && startY != 0f && endX != 0f && endY != 0f){
                         val lineX : Int
                         val lineY : Int
@@ -203,7 +204,7 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                             Thread.sleep(400L)
                         }catch (e : Exception){
                             if(e.message?.contains("out of range") == false){
-                                Toast.makeText(this.context,e.message,Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this.context,context.getString(R.string.error_line_already_drawn),Toast.LENGTH_SHORT).show()
                             }
                         }
 
@@ -231,7 +232,7 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
 
         //Takes scores per player
         val allScores  = ArrayList<Int>(players.size)
-        players.forEach { allScores.add(0) }
+        players.forEach { _ -> allScores.add(0) }
         var ownedBoxes = 0
         for (b in myGame.boxes){
             val owner = b.owningPlayer
@@ -241,15 +242,14 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
             }
         }
 
-        //Identidies the curent player
+        //Identifies the current player
         val player1Current = if(players.indexOf(myGame.currentPlayer) == 0) "> " else ""
         val player2Current = if(players.indexOf(myGame.currentPlayer) == 1) "> " else ""
-        val player1Name = "You"
-        var player2Name = ""
-        if(playAsOption == "Friend"){
-            player2Name = "Friend"
+        val player1Name: String = context.getString(R.string.player1_name)
+        val player2Name: String = if(playAsOption == "Friend"){
+            context.getString(R.string.friend_name)
         }else{
-            player2Name = "Computer"
+            context.getString(R.string.computer_name)
         }
         canvas.drawText(player1Current+player1Name+": "+allScores[0],(viewWidth / 2),120.toFloat(),mBoxHumanPlayerPaint)
         canvas.drawText(player2Current+player2Name+": "+allScores[1],(viewWidth / 2),marginTop,mBoxComputerPlayerPaint)
@@ -294,28 +294,25 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
                 else canvas.drawLine(lineStartX, lineStartY, lineEndX, lineEndY, mGridLineDrawnPaint)
             }
         }
-
-
     }
 
     //Detects gesture
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val DEBUG_TAG = "MyTask"
-        val action: Int = event.actionMasked
-        when (action) {
+        when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 drawingLine = true
-                startX = event.getX()
-                startY = event.getY()
-                // Set the end to prevent initial jump (like on the demo recording)
-                endX = event.getX()
-                endY = event.getY()
+                startX = event.x
+                startY = event.y
+                // Set the end to prevent initial jump
+                endX = event.x
+                endY = event.y
                 invalidate() //Call onDraw
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
-                endX = event.getX()
-                endY = event.getY()
+                endX = event.x
+                endY = event.y
                 invalidate()
                 return true
             }
@@ -327,8 +324,5 @@ class GameView(context: Context?, playAs: String, gridSize : List<String>) : Vie
             else -> return super.onTouchEvent(event)
         }
     }
-
-
-
 
 }

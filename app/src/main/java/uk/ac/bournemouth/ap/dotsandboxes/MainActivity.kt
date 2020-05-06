@@ -3,7 +3,6 @@ package uk.ac.bournemouth.ap.dotsandboxes
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.RadioButton
 import android.widget.RadioGroup
